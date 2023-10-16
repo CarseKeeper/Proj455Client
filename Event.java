@@ -30,6 +30,10 @@ public class Event implements Request {
     }
 
     // Getters
+    public int getID() {
+        return this.ID;
+    }
+
     public String getTitle() {
         return this.title;
     }

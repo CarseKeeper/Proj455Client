@@ -14,25 +14,33 @@ public class Client {
     ArrayList<Event> EVENTS = new ArrayList<Event>(); // List of all Events from the database
 
     public void main(String[] args) {
-        // While loop for getting a connection to the server
-        while (true) {
-            try {
-                Socket server = connectToServer();
+        try {
+            Socket server;
+            InputStreamReader in;
+            OutputStreamWriter out;
 
-                InputStream inBytes = server.getInputStream();
-                InputStreamReader in = new InputStreamReader(inBytes);
+            // While loop for getting a connection to the server
+            while (true) {
+                try {
+                    server = connectToServer();
+                    in = new InputStreamReader(server.getInputStream());
+                    out = new OutputStreamWriter(server.getOutputStream());
+                    break;
 
-                OutputStream outBytes = server.getOutputStream();
-                OutputStreamWriter outs = new OutputStreamWriter(outBytes);
-
-                break;
-
-            } catch (Exception e) {
-                System.err.println(e);
+                } catch (Exception e) {
+                    System.err.println(e);
+                }
             }
 
+            server.close();
+        } catch (Exception e) {
+            System.err.println(e);
         }
+
     }
+
+    // ----------------------------------------------------------------- //
+    // ----------------------------------------------------------------- //
 
     /*
      * Gets the active events from all events
@@ -52,7 +60,7 @@ public class Client {
     /*
      * Sends information to create a new event
      */
-    private void createEvent(Event newEvent) {
+    private void createEvent(Event newEvent, OutputStreamWriter out, InputStreamReader in) {
 
     }
 
@@ -94,17 +102,40 @@ public class Client {
         } catch (Exception e) {
             System.out.println(e);
         }
-        return 10000;
+        return 6789;
     }
 
+    /*
+     * gets all events from server and returns them as an ArrayList
+     */
     private ArrayList<Event> getEvents(InputStreamReader in, OutputStreamWriter out) {
         ArrayList<Event> events = new ArrayList<Event>();
         try {
-            out.write(1);
+            out.write("Message");
+            // events.add();
+
         } catch (Exception e) {
             System.err.println(e);
         }
 
         return events;
+    }
+
+    private void chooseEvent() {
+        try {
+
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+
+    /*
+     * helper method of chooseEvent that lists all events
+     */
+    private void listEvents(ArrayList<Event> events) {
+        int i = 1;
+        for (Event event : events) {
+            System.out.println(i++ + ".\t" + event.getTitle());
+        }
     }
 }
