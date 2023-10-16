@@ -55,32 +55,32 @@ public class Event implements Request {
     }
 
     // Setters
-    public void setTitle(String event) {
+    private void setTitle(String event) {
         this.title = event;
     }
 
-    public void setDescription(String description) {
+    private void setDescription(String description) {
         this.description = description;
     }
 
-    public void setGoal(double goal) {
+    private void setGoal(double goal) {
         if (goal >= 0.0)
             this.goal = goal;
         else
             this.goal = 0.0;
     }
 
-    public void setCurrentPool(double donation) {
+    private void setCurrentPool(double donation) {
         if (donation >= 0.0)
             this.currentPool += donation;
     }
 
-    public void setEndDate(LocalDateTime endDate) {
+    private void setEndDate(LocalDateTime endDate) {
         if ((endDate.isAfter(this.endDate) && endDate.isAfter(LocalDateTime.now())) || this.endDate == null)
             this.endDate = endDate;
     }
 
-    public void setFounder(Account founder) {
+    private void setFounder(Account founder) {
         this.founder = founder;
     }
 
@@ -101,6 +101,12 @@ public class Event implements Request {
         timeLeft.minusMinutes(now.getMinute());
         timeLeft.minusSeconds(now.getSecond());
         return timeLeft.toString();
+    }
+
+    public boolean hasEnded() {
+        if (LocalDateTime.now().isBefore(this.endDate))
+            return false;
+        return true;
     }
 
     public String formatEndDate() {
