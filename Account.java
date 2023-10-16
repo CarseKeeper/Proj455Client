@@ -1,4 +1,4 @@
-public class Account {
+public class Account implements Request {
     private String name;
     private double balance = 0.0;
 
