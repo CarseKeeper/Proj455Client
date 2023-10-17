@@ -127,8 +127,9 @@ public class Client {
         return events;
     }
 
-    private void chooseEvent() {
+    private void chooseEvent(ArrayList<Event> events) {
         try {
+            listEvents(currentEvents(events));
 
         } catch (Exception e) {
             System.err.println(e);
