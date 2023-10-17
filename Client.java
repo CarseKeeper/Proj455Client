@@ -1,11 +1,5 @@
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -16,15 +10,17 @@ public class Client {
     public void main(String[] args) {
         try {
             Socket server;
-            InputStreamReader in;
-            OutputStreamWriter out;
+            ObjectInputStream in;
+            ObjectOutputStream out;
 
             // While loop for getting a connection to the server
             while (true) {
                 try {
                     server = connectToServer();
-                    in = new InputStreamReader(server.getInputStream());
-                    out = new OutputStreamWriter(server.getOutputStream());
+                    out = new ObjectOutputStream(server.getOutputStream());
+                    out.flush();
+                    in = new ObjectInputStream(server.getInputStream());
+
                     break;
 
                 } catch (Exception e) {
@@ -60,8 +56,12 @@ public class Client {
     /*
      * Sends information to create a new event
      */
-    private void createEvent(Event newEvent, OutputStreamWriter out, InputStreamReader in) {
-
+    private void createEvent(Event newEvent, ObjectOutputStream out) {
+        try {
+            out.writeObject(newEvent);
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     }
 
     /*
@@ -108,10 +108,11 @@ public class Client {
     /*
      * gets all events from server and returns them as an ArrayList
      */
-    private ArrayList<Event> getEvents(InputStreamReader in, OutputStreamWriter out) {
+    private ArrayList<Event> getEvents(ObjectInputStream in, ObjectOutputStream out) {
         ArrayList<Event> events = new ArrayList<Event>();
         try {
-            out.write("Message");
+            out.writeObject("message");
+
             // events.add();
 
         } catch (Exception e) {
