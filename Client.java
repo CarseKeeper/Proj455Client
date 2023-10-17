@@ -3,6 +3,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.ser.Serializers;
+
 public class Client {
     Scanner scan = new Scanner(System.in); // Scanner for client input
     ArrayList<Event> EVENTS = new ArrayList<Event>(); // List of all Events from the database
@@ -10,16 +14,17 @@ public class Client {
     public void main(String[] args) {
         try {
             Socket server;
-            ObjectInputStream in;
-            ObjectOutputStream out;
+            InputStreamReader in;
+            OutputStreamWriter out;
+            WriteJsonObject makeString = new WriteJsonObject();
 
             // While loop for getting a connection to the server
             while (true) {
                 try {
                     server = connectToServer();
-                    out = new ObjectOutputStream(server.getOutputStream());
+                    out = new OutputStreamWriter(server.getOutputStream());
                     out.flush();
-                    in = new ObjectInputStream(server.getInputStream());
+                    in = new InputStreamReader(server.getInputStream());
 
                     break;
 
@@ -139,4 +144,5 @@ public class Client {
             System.out.println(i++ + ".\t" + event.getTitle());
         }
     }
+
 }

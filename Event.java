@@ -1,61 +1,80 @@
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+@JsonPropertyOrder({ "id", "title", "description", "target", "deadline", "balance" })
 public class Event implements Request {
-    private int ID;
+    private final int id;
     private String title;
     private String description;
-    private double goal;
-    private double currentPool;
-    private LocalDateTime endDate;
-    private Account founder;
+    private double target;
+    private Date deadline;
+    private double balance;
 
-    public Event() {
-        this.goal = 0.0;
-        this.currentPool = 0.0;
-        this.endDate = LocalDateTime.now();
-        this.title = "You forgot something";
-        this.description = "Go back and do it again.";
-        this.founder = null;
-    }
-
-    public Event(String event, String description, double goal, LocalDateTime endDate, Account founder) {
-        setTitle(event);
-        setDescription(description);
-        setGoal(goal);
-        this.currentPool = 0.0;
-        setEndDate(endDate);
-        setFounder(founder);
+    @JsonCreator
+    public Event(@JsonProperty("id") int id,
+            @JsonProperty("title") String title,
+            @JsonProperty("description") String description,
+            @JsonProperty("target") double target,
+            @JsonProperty("currentAmount") double currentAmount,
+            @JsonProperty("deadline") String deadline) throws ParseException {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.target = target;
+        SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        this.deadline = isoFormat.parse(deadline);
+        this.balance = currentAmount;
     }
 
     // Getters
-    public int getID() {
-        return this.ID;
+    @JsonGetter("id")
+    public int getId() {
+        return id;
     }
 
+    @JsonGetter("title")
     public String getTitle() {
         return this.title;
     }
 
+    @JsonGetter("description")
     public String getDescription() {
         return this.description;
     }
 
-    public double getGoal() {
-        return this.goal;
+    @JsonGetter("target")
+    public double getTarget() {
+        return this.target;
     }
 
-    public double getCurrentPool() {
-        return this.currentPool;
+    @JsonGetter("currentAmount")
+    public double getBalance() {
+        return this.balance;
     }
 
-    public LocalDateTime getEndDate() {
-        return this.endDate;
-    }
-
-    public Account getFounder() {
-        return this.founder;
+    public Date getDeadline() {
+        return this.deadline;
     }
 
     // Setters
@@ -69,54 +88,61 @@ public class Event implements Request {
 
     private void setGoal(double goal) {
         if (goal >= 0.0)
-            this.goal = goal;
+            this.target = goal;
         else
-            this.goal = 0.0;
+            this.target = 0.0;
     }
 
     private void setCurrentPool(double donation) {
         if (donation >= 0.0)
-            this.currentPool += donation;
+            this.balance += donation;
     }
 
-    private void setEndDate(LocalDateTime endDate) {
-        if ((endDate.isAfter(this.endDate) && endDate.isAfter(LocalDateTime.now())) || this.endDate == null)
-            this.endDate = endDate;
-    }
-
-    private void setFounder(Account founder) {
-        this.founder = founder;
+    private void setEndDate(Date endDate) {
+        if ((endDate.after(this.deadline) && endDate.after(new Date())) || this.deadline == null)
+            this.deadline = endDate;
     }
 
     // Methods
     public boolean goalReached() {
-        if (this.currentPool >= this.goal)
+        if (this.balance >= this.target)
             return true;
         return false;
     }
 
     public String timeLeft() {
-        LocalDateTime now = LocalDateTime.now();
+        Date now = new Date();
 
-        LocalDateTime timeLeft = this.endDate.minusYears(now.getYear());
-        timeLeft.minusMonths(now.getMonthValue());
-        timeLeft.minusDays(now.getDayOfMonth());
-        timeLeft.minusHours(now.getHour());
-        timeLeft.minusMinutes(now.getMinute());
-        timeLeft.minusSeconds(now.getSecond());
+        Date timeLeft = new Date((this.deadline.getTime() - now.getTime()));
         return timeLeft.toString();
     }
 
     public boolean hasEnded() {
-        if (LocalDateTime.now().isBefore(this.endDate))
+        if ((new Date()).before(this.deadline))
             return false;
         return true;
     }
 
-    public String formatEndDate() {
-        return this.endDate.toString();
+    @JsonGetter("deadline")
+    public String getDeadlineString() {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        df.setTimeZone(tz);
+        return df.format(this.deadline);
     }
 
     // pass Id not index
+    public static String RequestObject(InputStreamReader in, OutputStreamWriter out, String request) {
+        try {
+            out.write(request);
+            out.flush();
+            in.wait();
+            in.read();
+            return "";
+        } catch (Exception e) {
+            return "";
+        }
+
+    }
 
 }
