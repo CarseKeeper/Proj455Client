@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 @JsonPropertyOrder({ "id", "title", "description", "target", "deadline", "balance" })
-public class Event implements Request {
+public class Event {
     private final int id;
     private String title;
     private String description;
@@ -130,6 +130,7 @@ public class Event implements Request {
 
     // pass Id not index
     public static String RequestObject(BufferedReader in, OutputStreamWriter out, String id) {
+
         try {
             return "";
         } catch (Exception e) {

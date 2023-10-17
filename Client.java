@@ -14,7 +14,7 @@ public class Client {
     public void main(String[] args) {
         try {
             Socket server;
-            InputStreamReader in;
+            BufferedReader in;
             OutputStreamWriter out;
             WriteJsonObject makeString = new WriteJsonObject();
 
@@ -24,7 +24,7 @@ public class Client {
                     server = connectToServer();
                     out = new OutputStreamWriter(server.getOutputStream());
                     out.flush();
-                    in = new InputStreamReader(server.getInputStream());
+                    in = new BufferedReader(new InputStreamReader(server.getInputStream()));
 
                     break;
 
@@ -130,6 +130,7 @@ public class Client {
     private void chooseEvent(ArrayList<Event> events) {
         try {
             listEvents(currentEvents(events));
+            System.out.println("Enter the Event you wish to check: ");
 
         } catch (Exception e) {
             System.err.println(e);
