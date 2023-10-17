@@ -3,7 +3,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 
 public class WriteJsonObject {
-    ObjectMapper objMap = new ObjectMapper();
+    private ObjectMapper objMap = new ObjectMapper();
 
     public String serialize(Object Object) {
         try {

@@ -16,11 +16,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @JsonPropertyOrder({ "id", "title", "description", "target", "deadline", "balance" })
 public class Event implements Request {
@@ -73,6 +70,14 @@ public class Event implements Request {
         return this.balance;
     }
 
+    @JsonGetter("deadline")
+    public String getDeadlineString() {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        df.setTimeZone(tz);
+        return df.format(this.deadline);
+    }
+
     public Date getDeadline() {
         return this.deadline;
     }
@@ -123,26 +128,13 @@ public class Event implements Request {
         return true;
     }
 
-    @JsonGetter("deadline")
-    public String getDeadlineString() {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        df.setTimeZone(tz);
-        return df.format(this.deadline);
-    }
-
     // pass Id not index
-    public static String RequestObject(InputStreamReader in, OutputStreamWriter out, String request) {
+    public static String RequestObject(BufferedReader in, OutputStreamWriter out, String id) {
         try {
-            out.write(request);
-            out.flush();
-            in.wait();
-            in.read();
             return "";
         } catch (Exception e) {
-            return "";
+            return null;
         }
-
     }
 
 }
