@@ -1,8 +1,8 @@
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public class EventsRequest extends Request {
+public class EventsRequest {
     @JsonCreator
     public EventsRequest() {
-        super(RequestType.EVENTS);
+
     }
 }

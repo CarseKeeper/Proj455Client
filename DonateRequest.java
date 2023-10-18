@@ -1,14 +1,13 @@
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DonateRequest extends Request {
+public class DonateRequest {
     public double amount;
     public int eventid;
 
     @JsonCreator
     public DonateRequest(@JsonProperty("id") int eventid,
             @JsonProperty("amount") double amount) {
-        super(RequestType.DONATE);
         if (eventid > 0)
             this.eventid = eventid;
         else

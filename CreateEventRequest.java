@@ -2,7 +2,7 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CreateEventRequest extends Request {
+public class CreateEventRequest {
     public String title;
     public String description;
     public double target;
@@ -14,7 +14,6 @@ public class CreateEventRequest extends Request {
             @JsonProperty("description") String description,
             @JsonProperty("target") double target,
             @JsonProperty("deadline") Date deadline) {
-        super(RequestType.CREATE);
 
         this.title = title;
         this.description = description;

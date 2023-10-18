@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,16 +16,22 @@ public class Client {
             ArrayList<Event> EVENTS = new ArrayList<Event>(); // List of all Events from the database
             Socket server;
             BufferedReader in;
-            OutputStreamWriter out;
+            DataOutputStream out;
 
             // While loop for getting a connection to the server
             while (true) {
                 try {
                     server = connectToServer(scan);
-                    out = new OutputStreamWriter(server.getOutputStream());
-                    out.flush();
+                    out = new DataOutputStream(server.getOutputStream());
                     in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-                    out.write(27);
+                    WriteJsonObject json = new WriteJsonObject();
+                    Request req = new Request(RequestType.CREATE,
+                            json.serialize(new CreateEventRequest("tilt", "very tilt", 200, new Date())));
+                    out.writeBytes(json.serialize(req) + "\n");
+                    Request request = json.deserialize(in.readLine(), Request.class);
+                    CreateEventRequest cr = json.deserialize(request.requestBody, CreateEventRequest.class);
+                    System.out.println(cr.toString());
+
                     break;
 
                 } catch (Exception e) {
