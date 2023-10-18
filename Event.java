@@ -38,9 +38,15 @@ public class Event {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.target = target;
+        if (target > 0)
+            this.target = target;
+        else
+            this.target = Math.abs(target);
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        this.deadline = isoFormat.parse(deadline);
+        if (isoFormat.parse(deadline).after(new Date()))
+            this.deadline = isoFormat.parse(deadline);
+        else
+            this.deadline = new Date();
         this.balance = currentAmount;
     }
 
@@ -83,27 +89,27 @@ public class Event {
     }
 
     // Setters
-    private void setTitle(String event) {
+    public void setTitle(String event) {
         this.title = event;
     }
 
-    private void setDescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    private void setGoal(double goal) {
+    public void setGoal(double goal) {
         if (goal >= 0.0)
             this.target = goal;
         else
             this.target = 0.0;
     }
 
-    private void setCurrentPool(double donation) {
+    public void setCurrentPool(double donation) {
         if (donation >= 0.0)
             this.balance += donation;
     }
 
-    private void setEndDate(Date endDate) {
+    public void setEndDate(Date endDate) {
         if ((endDate.after(this.deadline) && endDate.after(new Date())) || this.deadline == null)
             this.deadline = endDate;
     }

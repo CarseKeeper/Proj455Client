@@ -1,3 +1,4 @@
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,7 +14,7 @@ public class CreateEventRequest {
     public CreateEventRequest(@JsonProperty("title") String title,
             @JsonProperty("description") String description,
             @JsonProperty("target") double target,
-            @JsonProperty("deadline") Date deadline) {
+            @JsonProperty("deadline") String deadline) {
 
         this.title = title;
         this.description = description;
@@ -22,10 +23,15 @@ public class CreateEventRequest {
         else
             this.target = Math.abs(target);
 
-        if (deadline.after(new Date()))
-            this.deadline = deadline;
-        else
-            this.deadline = new Date();
+        try {
+            SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+            if (date.parse(deadline).after(new Date()))
+                this.deadline = date.parse(deadline);
+            else
+                this.deadline = new Date();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         this.balance = 0.0;
 
     }
