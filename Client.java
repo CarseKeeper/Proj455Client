@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.ser.Serializers;
 
+import scala.collection.immutable.HashMap;
+
 public class Client {
 
     public static void main(String[] args) {
@@ -25,18 +27,48 @@ public class Client {
                     out = new DataOutputStream(server.getOutputStream());
                     in = new BufferedReader(new InputStreamReader(server.getInputStream()));
                     WriteJsonObject json = new WriteJsonObject();
-                    Request req = new Request(RequestType.EVENTS,
-                            json.serialize(new EventsRequest()));
+
+                    // Request req = new Request(RequestType.CREATE,
+                    // json.serialize(
+                    // new CreateEventRequest("tilt", "extra tilt", 8458,
+                    // "2024-05-04T09:10:10.000Z")));
+
+                    // Request req = new Request(RequestType.EVENTS, json.serialize(new
+                    // EventsRequest()));
+                    // out.writeBytes(json.serialize(req) + "\n");
+                    // String st = in.readLine();
+                    // System.out.println(st);
+                    // EVENTS = json.deserialize(json.deserialize(st, Response.class).responseBody,
+                    // EVENTS.getClass());
+                    // System.out.println(EVENTS);
+
+                    Request req = new Request(RequestType.UPDATE,
+                            json.serialize(new Event(1, "TILT", "MORE TILT", 4, 0, "2023-10-18T03:38:23.331Z")));
                     out.writeBytes(json.serialize(req) + "\n");
-                    Request request = json.deserialize(in.readLine(), Request.class);
-                    EventRequest cr = json.deserialize(request.requestBody, EventRequest.class);
-                    System.out.println(cr.toString());
+                    String st = in.readLine();
+                    System.out.println(st);
+                    Event ev = json.deserialize(json.deserialize(st, Response.class).responseBody, Event.class);
+                    System.out.println(ev.getTitle());
+
+                    // System.out.println((json.deserialize(st, Event.class)).getTitle());
+                    // Request request = json.deserialize(in.readLine(), Request.class);
+                    // CreateEventRequest cr = json.deserialize(request.requestBody,
+                    // CreateEventRequest.class);
+                    // System.out.println(cr.title);
 
                     break;
 
                 } catch (Exception e) {
                     System.err.println(e);
                 }
+            }
+
+            while (true) {
+                System.out.println(
+                        "(1): List the events available\n(2): Create a new event\n(3): Donate to an event\n(4): Update an event");
+                if ("1".equals(scan.nextLine()))
+                    System.out.println("a");
+                break;
             }
 
             server.close();
