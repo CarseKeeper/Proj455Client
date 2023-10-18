@@ -7,7 +7,7 @@ public class UpdateEventRequest {
     String event;
 
     @JsonCreator
-    UpdateEventRequest(@JsonProperty("Event") Event event) {
+    UpdateEventRequest(@JsonProperty("Event") String event) {
 
     }
 }

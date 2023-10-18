@@ -13,4 +13,8 @@ public class Response {
         this.responseBody = responseBody;
     }
 
+    public <T> T getResponseBody(WriteJsonObject json, T obj) {
+        return json.deserialize(this.responseBody, obj.getClass());
+    }
+
 }
