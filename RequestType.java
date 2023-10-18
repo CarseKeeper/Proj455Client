@@ -3,5 +3,6 @@ public enum RequestType {
     EVENT,
     EVENTS,
     CREATE,
-    DONATE
+    DONATE,
+    UPDATE
 }

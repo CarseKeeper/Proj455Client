@@ -25,11 +25,11 @@ public class Client {
                     out = new DataOutputStream(server.getOutputStream());
                     in = new BufferedReader(new InputStreamReader(server.getInputStream()));
                     WriteJsonObject json = new WriteJsonObject();
-                    Request req = new Request(RequestType.CREATE,
-                            json.serialize(new CreateEventRequest("tilt", "very tilt", 200, new Date())));
+                    Request req = new Request(RequestType.EVENTS,
+                            json.serialize(new EventsRequest()));
                     out.writeBytes(json.serialize(req) + "\n");
                     Request request = json.deserialize(in.readLine(), Request.class);
-                    CreateEventRequest cr = json.deserialize(request.requestBody, CreateEventRequest.class);
+                    EventRequest cr = json.deserialize(request.requestBody, EventRequest.class);
                     System.out.println(cr.toString());
 
                     break;
