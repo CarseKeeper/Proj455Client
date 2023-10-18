@@ -8,24 +8,23 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.ser.Serializers;
 
 public class Client {
-    Scanner scan = new Scanner(System.in); // Scanner for client input
-    ArrayList<Event> EVENTS = new ArrayList<Event>(); // List of all Events from the database
 
-    public void main(String[] args) {
+    public static void main(String[] args) {
         try {
+            Scanner scan = new Scanner(System.in); // Scanner for client input
+            ArrayList<Event> EVENTS = new ArrayList<Event>(); // List of all Events from the database
             Socket server;
             BufferedReader in;
             OutputStreamWriter out;
-            WriteJsonObject makeString = new WriteJsonObject();
 
             // While loop for getting a connection to the server
             while (true) {
                 try {
-                    server = connectToServer();
+                    server = connectToServer(scan);
                     out = new OutputStreamWriter(server.getOutputStream());
                     out.flush();
                     in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-
+                    out.write(27);
                     break;
 
                 } catch (Exception e) {
@@ -46,7 +45,7 @@ public class Client {
     /*
      * Gets the active events from all events
      */
-    private ArrayList<Event> currentEvents(ArrayList<Event> EVENTS) {
+    private static ArrayList<Event> currentEvents(ArrayList<Event> EVENTS) {
         ArrayList<Event> curEvents = new ArrayList<Event>();
         for (Event event : EVENTS) {
             if (event.hasEnded())
@@ -61,7 +60,7 @@ public class Client {
     /*
      * Sends information to create a new event
      */
-    private void createEvent(Event newEvent, ObjectOutputStream out) {
+    private static void createEvent(Event newEvent, ObjectOutputStream out) {
         try {
             out.writeObject(newEvent);
         } catch (Exception e) {
@@ -72,9 +71,9 @@ public class Client {
     /*
      * tries to connect to the server
      */
-    private Socket connectToServer() {
+    private static Socket connectToServer(Scanner scan) {
         try {
-            Socket server = new Socket(getHost(), getPort(), null, 0);
+            Socket server = new Socket(getHost(scan), getPort(scan), null, 0);
             return server;
         } catch (Exception e) {
             System.err.println(e);
@@ -85,7 +84,7 @@ public class Client {
     /*
      * helper method of connectToServer to prompt the client for a server host
      */
-    private String getHost() {
+    private static String getHost(Scanner scan) {
         System.out.print("Enter IP address: ");
         try {
             String host = scan.nextLine();
@@ -99,7 +98,7 @@ public class Client {
     /*
      * helper method of connectToServer to prompt the client for a port number
      */
-    private int getPort() {
+    private static int getPort(Scanner scan) {
         System.out.print("Enter port number: ");
         try {
             int port = scan.nextInt();
@@ -113,10 +112,11 @@ public class Client {
     /*
      * gets all events from server and returns them as an ArrayList
      */
-    private ArrayList<Event> getEvents(ObjectInputStream in, ObjectOutputStream out) {
+    private static ArrayList<Event> getEvents(BufferedReader in, OutputStreamWriter out) {
         ArrayList<Event> events = new ArrayList<Event>();
+        WriteJsonObject json = new WriteJsonObject();
         try {
-            out.writeObject("message");
+            out.write(json.serialize(new EventsRequest()));
 
             // events.add();
 
@@ -127,7 +127,7 @@ public class Client {
         return events;
     }
 
-    private void chooseEvent(ArrayList<Event> events) {
+    private static void chooseEvent(ArrayList<Event> events) {
         try {
             listEvents(currentEvents(events));
             System.out.println("Enter the Event you wish to check: ");
@@ -140,7 +140,7 @@ public class Client {
     /*
      * helper method of chooseEvent that lists all events
      */
-    private void listEvents(ArrayList<Event> events) {
+    private static void listEvents(ArrayList<Event> events) {
         int i = 1;
         for (Event event : events) {
             System.out.println(i++ + ".\t" + event.getTitle());
