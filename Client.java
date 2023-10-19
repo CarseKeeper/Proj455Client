@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -8,8 +9,6 @@ import java.util.Scanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.ser.Serializers;
-
-import scala.collection.immutable.HashMap;
 
 public class Client {
 
@@ -93,19 +92,12 @@ public class Client {
                 }
                 // DONATE AN AMOUNT TO AN EVENT
                 else if (answer.startsWith("3")) {
-
+                    donateToEvent(EVENTS, scan, in, out, json);
                 }
-                // UPDATES AN EVENT AND CHANGES IT IN THE CURRENT LIST
+                // UPDATES AN EVENT FROM ALL EVENTS
                 else if (answer.startsWith("4")) {
                     listEvents(EVENTS);
-                    System.out.print("Pick an event: ");
-                    int index = scan.nextInt();
-                    if (index < EVENTS.size()) {
-                        Event event = EVENTS.get(index);
-
-                    } else {
-                        System.out.println("That index is not available.");
-                    }
+                    updateEvent(EVENTS, scan, in, out, json);
                 }
                 // PRINTS OUT CURRENT EVENTS AND PAST EVENTS
                 else if (answer.startsWith("5")) {
@@ -142,8 +134,8 @@ public class Client {
 
     }
 
-    // ----------------------------------------------------------------- //
-    // ----------------------------------------------------------------- //
+    // -------------------------------------------------------------------------------------------------------------------------------------//
+    // -------------------------------------------------------------------------------------------------------------------------------------//
 
     /*
      * Gets the active events from all events
@@ -285,14 +277,62 @@ public class Client {
     /*
      * lists all the current events and prompts user to choose one
      */
-    private static void chooseEvent(ArrayList<Event> EVENTS) {
+    private static void updateEvent(ArrayList<Event> EVENTS, Scanner scan, BufferedReader in, DataOutputStream out,
+            WriteJsonObject json) {
         try {
-            listEvents(currentEvents(EVENTS));
-            System.out.println("Enter the Event you wish to check: ");
+            System.out.print("choose an event or -1 to go back: ");
+            int index = scan.nextInt();
+            if (index < EVENTS.size() && index >= 0) {
+                Event newEvent = EVENTS.get(index);
+                UpdateEventRequest update = changeEvent(newEvent, scan, json);
+                out.writeBytes(json.serialize(new Request(RequestType.UPDATE, json.serialize(update))));
+                Response response = json.deserialize(in.readLine(), Response.class);
+                if (response.responseType == RequestType.UPDATE) {
+                    if (index != json.deserialize(response.responseBody, Event.class).getId())
+                        throw new Exception(response.responseBody);
+                }
+            } else if (index == -1) {
 
+            } else {
+                System.out.println("That index is not available.");
+            }
         } catch (Exception e) {
-            System.err.println(e);
+            e.printStackTrace();
         }
+    }
+
+    /*
+     * Prompts the user to pick an event and donates money to it
+     */
+    private static void donateToEvent(ArrayList<Event> EVENTS, Scanner scan, BufferedReader in, DataOutputStream out,
+            WriteJsonObject json) {
+        try {
+            ArrayList<Event> curEvents = currentEvents(EVENTS);
+            listEvents(curEvents);
+            System.out.print("Choose and active event or -1 to go back: ");
+            int index = scan.nextInt();
+            if (index > 0 && index < curEvents.size()) {
+                System.out.print("Enter a donation amount (####.##): ");
+                double amount = scan.nextDouble();
+                String donate = json.serialize(new DonateRequest(curEvents.get(index).getId(), amount));
+                out.writeBytes(json.serialize(new Request(RequestType.DONATE, donate)));
+            } else if (index == -1) {
+
+            } else {
+                System.out.println("That index is not available.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            Response response = json.deserialize(in.readLine(), Response.class);
+            if (response.responseType != RequestType.DONATE) {
+                throw new Exception(response.responseBody);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /*
@@ -316,6 +356,18 @@ public class Client {
         double target = scan.nextDouble();
         if (target != 0)
             event.setGoal(target);
+
+        System.out.printf("Current Balance: %15f", event.getBalance());
+        System.out.print("New Balance: ");
+        double balance = scan.nextDouble();
+        if (balance != 0)
+            event.setCurrentPool(balance);
+
+        System.out.printf("Current Date: %20s", event.getDeadlineString());
+        System.out.print("New Date (YYYY-MM-DDTHH:MM:SSSZ): ");
+        String date = scan.nextLine();
+        if (!date.equals(""))
+            event.setEndDate(date);
         return new UpdateEventRequest(json.serialize(json));
     }
 
@@ -349,7 +401,7 @@ public class Client {
     }
 
     /*
-     * 
+     * returns a response if one exists from the reader
      */
     private static Response getResponse(BufferedReader in, WriteJsonObject json) {
         try {

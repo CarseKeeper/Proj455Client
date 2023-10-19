@@ -106,12 +106,23 @@ public class Event {
 
     public void setCurrentPool(double donation) {
         if (donation >= 0.0)
-            this.balance += donation;
+            this.balance = donation;
+        else
+            this.balance = Math.abs(donation);
     }
 
     public void setEndDate(Date endDate) {
         if ((endDate.after(this.deadline) && endDate.after(new Date())) || this.deadline == null)
             this.deadline = endDate;
+    }
+
+    public void setEndDate(String date) {
+        try {
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+            this.deadline = isoFormat.parse(date);
+        } catch (Exception e) {
+
+        }
     }
 
     // Methods
