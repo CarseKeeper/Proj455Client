@@ -75,24 +75,63 @@ public class Client {
             }
 
             while (true) {
-
-                System.out.printf("%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s",
-                        "(1):", "List the events available", "(2):", "Create a new event", "(3):", "Donate to an event",
-                        "(4):", "Update an event", "(q):", "Quit");
+                EVENTS = getEvents(in, out);
+                System.out.printf("%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s",
+                        "(1):", "List the current events", "(2):", "Create a new event", "(3):", "Donate to an event",
+                        "(4):", "Update an event", "(5)", "List ALL events", "(q):", "Quit");
                 String answer = scan.nextLine();
 
+                // LIST CURRENT EVENTS
                 if (answer.startsWith("1")) {
                     EVENTS = getEvents(in, out);
                     listEvents(EVENTS);
-                } else if (answer.startsWith("2")) {
-                    Event newEvent = formEvent(scan);
-                    createEvent(newEvent, out, in, json);
-                } else if (answer.startsWith("3")) {
+                }
+                // CREATE A NEW EVENT
+                else if (answer.startsWith("2")) {
+                    CreateEventRequest newEvent = formEvent(scan);
+                    createEvent(EVENTS, newEvent, out, in, json);
+                }
+                // DONATE AN AMOUNT TO AN EVENT
+                else if (answer.startsWith("3")) {
 
-                } else if (answer.startsWith("4")) {
+                }
+                // UPDATES AN EVENT AND CHANGES IT IN THE CURRENT LIST
+                else if (answer.startsWith("4")) {
+                    listEvents(EVENTS);
+                    System.out.print("Pick an event: ");
+                    int index = scan.nextInt();
+                    if (index < EVENTS.size()) {
+                        Event event = EVENTS.get(index);
 
-                } else if (answer.toLowerCase().startsWith("q")) {
+                    } else {
+                        System.out.println("That index is not available.");
+                    }
+                }
+                // PRINTS OUT CURRENT EVENTS AND PAST EVENTS
+                else if (answer.startsWith("5")) {
+                    ArrayList<Event> curEvents = currentEvents(EVENTS);
+                    ArrayList<Event> pastEvents = pastEvents(EVENTS);
+                    System.out.printf("  %-25s  |  %-25s  ", "Current Events", "Past Events");
+                    System.out.println("-----------------------------------------------------------");
+                    for (int i = 0; i < curEvents.size() || i < pastEvents.size(); i++) {
+                        String ce = "";
+                        String pe = "";
+                        if (i < curEvents.size())
+                            ce = curEvents.get(i).getTitle();
+                        if (i < pastEvents.size())
+                            pe = pastEvents.get(i).getTitle();
+
+                        System.out.printf("  %-25s  |  %-25s  ", ce, pe);
+                    }
+                    System.out.println();
+                }
+                // QUITS THE PROGRAM
+                else if (answer.toLowerCase().startsWith("q")) {
                     break;
+                }
+                // INVALID INPUT DETECTED, TRY AGAIN
+                else {
+                    System.out.println("Invalid input.");
                 }
             }
 
@@ -122,21 +161,43 @@ public class Client {
     }
 
     /*
+     * Gets the past events from all events
+     */
+    private static ArrayList<Event> pastEvents(ArrayList<Event> EVENTS) {
+        ArrayList<Event> pastEvents = new ArrayList<Event>();
+        for (Event event : EVENTS) {
+            if (event.hasEnded())
+                pastEvents.add(event);
+        }
+
+        return pastEvents;
+    }
+
+    /*
      * Sends information to create a new event
      */
-    private static void createEvent(Event newEvent, DataOutputStream out, BufferedReader in, WriteJsonObject json) {
+    private static void createEvent(ArrayList<Event> EVENTS, CreateEventRequest newEvent, DataOutputStream out,
+            BufferedReader in,
+            WriteJsonObject json) {
         try {
             String body = json.serialize(newEvent);
             out.writeBytes(json.serialize(new Request(RequestType.CREATE, body)));
         } catch (Exception e) {
             System.err.println(e);
+        } finally {
+            Response response = getResponse(in, json);
+            if (response.responseType == RequestType.CREATE) {
+                EVENTS.add(json.deserialize(response.responseBody, Event.class));
+            } else {
+                System.err.println("error occured, response body: " + response.responseBody);
+            }
         }
     }
 
     /*
      * Creates a new Event object to be sent
      */
-    private static Event formEvent(Scanner scan) {
+    private static CreateEventRequest formEvent(Scanner scan) {
         try {
             System.out.print("Enter the title for Event: ");
             String title = scan.nextLine();
@@ -148,7 +209,7 @@ public class Client {
                     "Enter the deadline in the form YYYY-MM-DDTHH:MM:SSSZ\ne.g. Oct 25, 2023 at 1:45:30PM would be 2023-10-25T13:45:300Z: ");
             String deadline = scan.nextLine();
 
-            return (new Event(0, title, description, target, 0, deadline));
+            return (new CreateEventRequest(title, description, target, deadline));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -206,10 +267,16 @@ public class Client {
         try {
             out.writeBytes(json.serialize(new EventsRequest()));
 
-            // events.add();
-
         } catch (Exception e) {
             System.err.println(e);
+        } finally {
+            try {
+                Response response = json.deserialize(in.readLine(), Response.class);
+                if (response.responseType == RequestType.EVENTS)
+                    events = json.deserialize(response.responseBody, events.getClass());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return events;
@@ -218,14 +285,38 @@ public class Client {
     /*
      * lists all the current events and prompts user to choose one
      */
-    private static void chooseEvent(ArrayList<Event> events) {
+    private static void chooseEvent(ArrayList<Event> EVENTS) {
         try {
-            listEvents(currentEvents(events));
+            listEvents(currentEvents(EVENTS));
             System.out.println("Enter the Event you wish to check: ");
 
         } catch (Exception e) {
             System.err.println(e);
         }
+    }
+
+    /*
+     * Prints current variables and prompts for new variable
+     */
+    private static UpdateEventRequest changeEvent(Event event, Scanner scan, WriteJsonObject json) {
+        System.out.printf("Current Title: %25s", event.getTitle());
+        System.out.print("New Title: ");
+        String title = scan.nextLine();
+        if (!title.equals(""))
+            event.setTitle(title);
+
+        System.out.printf("Current Description: %s", event.getDescription());
+        System.out.print("New Description: ");
+        String description = scan.nextLine();
+        if (!description.equals(""))
+            event.setDescription(description);
+
+        System.out.printf("Current Target: %15f", event.getTarget());
+        System.out.print("New Target: ");
+        double target = scan.nextDouble();
+        if (target != 0)
+            event.setGoal(target);
+        return new UpdateEventRequest(json.serialize(json));
     }
 
     /*
