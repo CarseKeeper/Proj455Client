@@ -15,6 +15,7 @@ public class Client {
 
     public static void main(String[] args) {
         try {
+            WriteJsonObject json = new WriteJsonObject();
             Scanner scan = new Scanner(System.in); // Scanner for client input
             ArrayList<Event> EVENTS = new ArrayList<Event>(); // List of all Events from the database
             Socket server;
@@ -27,7 +28,6 @@ public class Client {
                     server = connectToServer(scan);
                     out = new DataOutputStream(server.getOutputStream());
                     in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-                    WriteJsonObject json = new WriteJsonObject();
 
                     // ---------------------------------------------------------Attempt of Create
                     // request
@@ -76,13 +76,24 @@ public class Client {
 
             while (true) {
 
-                System.out.printf("%-4", )(
-                        "(1):\tList the events available\n(2): Create a new event\n(3): Donate to an event\n(4): Update an event");
-                if ("1".equals(scan.nextLine())) {
+                System.out.printf("%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s",
+                        "(1):", "List the events available", "(2):", "Create a new event", "(3):", "Donate to an event",
+                        "(4):", "Update an event", "(q):", "Quit");
+                String answer = scan.nextLine();
+
+                if (answer.startsWith("1")) {
                     EVENTS = getEvents(in, out);
                     listEvents(EVENTS);
+                } else if (answer.startsWith("2")) {
+                    Event newEvent = formEvent(scan);
+                    createEvent(newEvent, out, in, json);
+                } else if (answer.startsWith("3")) {
+
+                } else if (answer.startsWith("4")) {
+
+                } else if (answer.toLowerCase().startsWith("q")) {
+                    break;
                 }
-                break;
             }
 
             server.close();
@@ -113,12 +124,36 @@ public class Client {
     /*
      * Sends information to create a new event
      */
-    private static void createEvent(Event newEvent, ObjectOutputStream out) {
+    private static void createEvent(Event newEvent, DataOutputStream out, BufferedReader in, WriteJsonObject json) {
         try {
-            out.writeObject(newEvent);
+            String body = json.serialize(newEvent);
+            out.writeBytes(json.serialize(new Request(RequestType.CREATE, body)));
         } catch (Exception e) {
             System.err.println(e);
         }
+    }
+
+    /*
+     * Creates a new Event object to be sent
+     */
+    private static Event formEvent(Scanner scan) {
+        try {
+            System.out.print("Enter the title for Event: ");
+            String title = scan.nextLine();
+            System.out.print("Enter the description for the Event: ");
+            String description = scan.nextLine();
+            System.out.print("Enter the target amount as a double (####.##): ");
+            double target = scan.nextDouble();
+            System.out.print(
+                    "Enter the deadline in the form YYYY-MM-DDTHH:MM:SSSZ\ne.g. Oct 25, 2023 at 1:45:30PM would be 2023-10-25T13:45:300Z: ");
+            String deadline = scan.nextLine();
+
+            return (new Event(0, title, description, target, 0, deadline));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
     /*
@@ -222,4 +257,15 @@ public class Client {
         return 0;
     }
 
+    /*
+     * 
+     */
+    private static Response getResponse(BufferedReader in, WriteJsonObject json) {
+        try {
+            return json.deserialize(in.readLine(), Response.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
