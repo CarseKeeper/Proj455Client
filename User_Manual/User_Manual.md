@@ -12,8 +12,6 @@ Standard logs will be in white and errors will appear in red.
 Errors will be logged in the server and sent to the client.
 
 
-
-
 ### Request Response Model
 
 The Server Client pair uses an in-house communication method
