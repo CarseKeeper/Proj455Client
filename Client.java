@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.Socket;
+import java.text.DecimalFormat;
 import java.text.Format;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,12 +20,12 @@ public class Client {
 
     public static void main(String[] args) {
         try {
-            WriteJsonObject json = new WriteJsonObject();
+            WriteJsonObject json = new WriteJsonObject(); //Serializer and Deserializer object
             Scanner scan = new Scanner(System.in); // Scanner for client input
             ArrayList<Event> EVENTS = new ArrayList<Event>(); // List of all Events from the database
             Socket server;
-            BufferedReader in;
-            DataOutputStream out;
+            BufferedReader in; //from server
+            DataOutputStream out; //to server
 
             // While loop for getting a connection to the server
             while (true) {
@@ -38,8 +40,10 @@ public class Client {
                 }
             }
 
+            //MAIN Logic Loop
             while (true) {
-                EVENTS = getEvents(in, out);
+                EVENTS = getEvents(in, out); //Each iteration updates the list of all events
+                //User is prompted for an action
                 System.out.printf("%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s\n>",
                         "(1):", "List the current events", "(2):", "Create a new event", "(3):", "Donate to an event",
                         "(4):", "Update an event", "(5):", "List ALL events", "(q):", "Quit");
@@ -67,20 +71,7 @@ public class Client {
                 }
                 // PRINTS OUT CURRENT EVENTS AND PAST EVENTS
                 else if (answer.startsWith("5")) {
-                    ArrayList<Event> curEvents = currentEvents(EVENTS);
-                    ArrayList<Event> pastEvents = pastEvents(EVENTS);
-                    System.out.printf("  %-25s  |  %-25s  %n", "Current Events", "Past Events");
-                    System.out.println("-----------------------------------------------------------");
-                    for (int i = 0; i < curEvents.size() || i < pastEvents.size(); i++) {
-                        String ce = "";
-                        String pe = "";
-                        if (i < curEvents.size())
-                            ce = curEvents.get(i).getTitle();
-                        if (i < pastEvents.size())
-                            pe = pastEvents.get(i).getTitle();
-
-                        System.out.printf("  %-25s  |  %-25s  %n", ce, pe);
-                    }
+                    listAllEvents(EVENTS);
                     System.out.println();
                 }
                 // QUITS THE PROGRAM
@@ -93,6 +84,7 @@ public class Client {
                 }
             }
 
+            //Always close the connection when done
             server.close();
         } catch (Exception e) {
             System.err.println(e);
@@ -343,7 +335,7 @@ public class Client {
         String temp = "";
 
         while(target < 0) {
-            System.out.printf("Current Target: %-15f%n", event.getTarget());
+            System.out.printf("Current Target: %-15s%n", getCurrency(event.getTarget()));
             System.out.print("New Target: ");
             temp = scan.nextLine();
             Scanner scantemp = new Scanner(temp);
@@ -359,7 +351,7 @@ public class Client {
         double balance = -1.0;
 
         while(balance < 0) {
-            System.out.printf("Current Balance: %-15f%n", event.getBalance());
+            System.out.printf("Current Balance: $%-15s%n", getCurrency(event.getBalance()));
             System.out.print("New Balance: ");
             temp = scan.nextLine();
             Scanner scantemp = new Scanner(temp);
@@ -389,7 +381,62 @@ public class Client {
     private static void listEvents(ArrayList<Event> events) {
         int i = 1;
         for (Event event : events) {
-            System.out.printf("%8d.    %-35s%n               = %-1s =%n", i++, event.getTitle(), event.getDescription());
+            System.out.printf("%8d.    %-35s  Ends: %-12s%n               = %-1s =%n", i++, event.getTitle(), event.getDeadlineString().substring(0,10), event.getDescription());
         }
+    }
+
+    /*
+     * Prints all events, past and current, in a table
+     */
+    private static void listAllEvents(ArrayList<Event> EVENTS){
+        ArrayList<Event> curEvents = currentEvents(EVENTS);
+        ArrayList<Event> pastEvents = pastEvents(EVENTS);
+        System.out.println("--------------------------------------------------------------------------|=|--------------------------------------------------------------------------");
+        System.out.printf("|  %-25s | %-15s | %-8s | %-12s  |=|  %-25s | %-15s | %-8s | %-12s  |%n", "Current Events", "Target", "Percent", "Deadline", "Past Events", "Target", "Percent", "Deadline");
+        System.out.println("--------------------------------------------------------------------------|=|--------------------------------------------------------------------------");
+        for (int i = 0; i < curEvents.size() || i < pastEvents.size(); i++) {
+            String ce = "";
+            String cet = "";
+            String cep = "";
+            String ced = "";
+            String pe = "";
+            String pet = "";
+            String pep = "";
+            String ped = "";
+            if (i < curEvents.size()) {
+                ce = curEvents.get(i).getTitle();
+                cet = String.valueOf(curEvents.get(i).getTarget());
+                cep = getPercent(curEvents.get(i).getTarget(), curEvents.get(i).getBalance());
+                ced = curEvents.get(i).getDeadlineString().substring(0, 10);
+            }
+            if (i < pastEvents.size()) {
+                pe = pastEvents.get(i).getTitle();
+                pet = String.valueOf(pastEvents.get(i).getTarget());
+                pep = getPercent(pastEvents.get(i).getTarget(), pastEvents.get(i).getBalance());
+                ped = pastEvents.get(i).getDeadlineString().substring(0, 10);
+            }
+
+            System.out.printf("|  %-25s | %-15s | %-8s | %-12s  |=|  %-25s | %-15s | %-8s | %-12s  |%n", ce, cet, cep, ced, pe, pet, pep, ped);
+            System.out.println("--------------------------------------------------------------------------|=|--------------------------------------------------------------------------");
+
+        }
+        System.out.println();
+    }
+
+    /*
+     * gets the percent completeness of an event and returns it as a String with 2 decimal places
+     */
+    private static String getPercent(double target, double balance){
+        double percent = (balance/target) * 100;
+        NumberFormat percentage = NumberFormat.getPercentInstance();
+        return percentage.format(percent);
+    }
+
+    /*
+     * gets the currency formatted String of a value
+     */
+    private static String getCurrency(double value){
+        NumberFormat currency = NumberFormat.getCurrencyInstance();
+        return currency.format(value);
     }
 }
