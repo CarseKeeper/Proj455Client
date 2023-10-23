@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+/*
+ * Makes a package to be sent to the server to create a new event
+ */
 public class CreateEventRequest {
     public String title;
     public String description;
