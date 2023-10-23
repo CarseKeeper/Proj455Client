@@ -132,6 +132,7 @@ public class Client {
         try {
             String body = json.serialize(newEvent);
             out.writeBytes(json.serialize(new Request(RequestType.CREATE, body)) + "\n");
+            in.readLine();
         } catch (Exception e) {
             System.err.println(e);
         }
@@ -256,6 +257,7 @@ public class Client {
                 Event newEvent = EVENTS.get(index);
                 String update = changeEvent(newEvent, json);
                 out.writeBytes(json.serialize(new Request(RequestType.UPDATE, update)) + "\n");
+                in.readLine();
             } else if (index == -2) {
 
             } else {
@@ -338,17 +340,20 @@ public class Client {
             event.setDescription(description);
 
         double target = -1.0;
-        String temp;
+        String temp = "";
 
         while(target < 0) {
             System.out.printf("Current Target: %-15f%n", event.getTarget());
             System.out.print("New Target: ");
             temp = scan.nextLine();
             Scanner scantemp = new Scanner(temp);
+            if(temp.isEmpty()){
+                break;
+            }
             if(scantemp.hasNextDouble())
                 target = scantemp.nextDouble();
         }
-        if (target != 0)
+        if (!temp.isEmpty())
             event.setGoal(target);
 
         double balance = -1.0;
@@ -358,10 +363,13 @@ public class Client {
             System.out.print("New Balance: ");
             temp = scan.nextLine();
             Scanner scantemp = new Scanner(temp);
+            if(temp.isEmpty()){
+                break;
+            }
             if(scantemp.hasNextDouble())
                 balance = scantemp.nextDouble();
         }
-        if (balance != 0)
+        if (!temp.isEmpty())
             event.setCurrentPool(balance);
 
         String date = null;
