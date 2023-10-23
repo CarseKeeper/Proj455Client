@@ -1,9 +1,10 @@
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 
 public class WriteJsonObject {
-    private ObjectMapper objMap = new ObjectMapper();
+    private final ObjectMapper objMap = new ObjectMapper();
 
     public String serialize(Object Object) {
         try {
@@ -14,6 +15,14 @@ public class WriteJsonObject {
     }
 
     public <T> T deserialize(String json, Class<T> obj) {
+        try {
+            return this.objMap.readValue(json, obj);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public  <T> T deserialize(String json, TypeReference<T> obj){
         try {
             return this.objMap.readValue(json, obj);
         } catch (Exception e) {

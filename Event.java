@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,11 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -84,6 +80,7 @@ public class Event {
         return df.format(this.deadline);
     }
 
+
     public Date getDeadline() {
         return this.deadline;
     }
@@ -98,7 +95,7 @@ public class Event {
     }
 
     public void setGoal(double goal) {
-        if (goal >= 0.0)
+        if (goal > 0.0)
             this.target = goal;
         else
             this.target = 0.0;
@@ -127,9 +124,7 @@ public class Event {
 
     // Methods
     public boolean goalReached() {
-        if (this.balance >= this.target)
-            return true;
-        return false;
+        return this.balance >= this.target;
     }
 
     public String timeLeft() {
@@ -140,18 +135,9 @@ public class Event {
     }
 
     public boolean hasEnded() {
-        if ((new Date()).before(this.deadline))
-            return false;
-        return true;
+        return !(new Date()).before(this.deadline);
     }
 
     // pass Id not index
-    public static String RequestObject(BufferedReader in, OutputStreamWriter out, String id) {
 
-        try {
-            return "";
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }

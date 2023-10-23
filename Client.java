@@ -24,7 +24,7 @@ public class Client {
             // While loop for getting a connection to the server
             while (true) {
                 try {
-                    server = connectToServer(scan);
+                    server = connectToServer();
                     out = new DataOutputStream(server.getOutputStream());
                     in = new BufferedReader(new InputStreamReader(server.getInputStream()));
 
@@ -77,33 +77,34 @@ public class Client {
                 EVENTS = getEvents(in, out);
                 System.out.printf("%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s",
                         "(1):", "List the current events", "(2):", "Create a new event", "(3):", "Donate to an event",
-                        "(4):", "Update an event", "(5)", "List ALL events", "(q):", "Quit");
+                        "(4):", "Update an event", "(5):", "List ALL events", "(q):", "Quit");
                 String answer = scan.nextLine();
 
                 // LIST CURRENT EVENTS
                 if (answer.startsWith("1")) {
-                    EVENTS = getEvents(in, out);
+                    EVENTS = currentEvents(EVENTS);
                     listEvents(EVENTS);
+                    System.out.println();
                 }
                 // CREATE A NEW EVENT
                 else if (answer.startsWith("2")) {
-                    CreateEventRequest newEvent = formEvent(scan);
+                    CreateEventRequest newEvent = formEvent();
                     createEvent(EVENTS, newEvent, out, in, json);
                 }
                 // DONATE AN AMOUNT TO AN EVENT
                 else if (answer.startsWith("3")) {
-                    donateToEvent(EVENTS, scan, in, out, json);
+                    donateToEvent(EVENTS, in, out, json);
                 }
                 // UPDATES AN EVENT FROM ALL EVENTS
                 else if (answer.startsWith("4")) {
                     listEvents(EVENTS);
-                    updateEvent(EVENTS, scan, in, out, json);
+                    updateEvent(EVENTS, in, out, json);
                 }
                 // PRINTS OUT CURRENT EVENTS AND PAST EVENTS
                 else if (answer.startsWith("5")) {
                     ArrayList<Event> curEvents = currentEvents(EVENTS);
                     ArrayList<Event> pastEvents = pastEvents(EVENTS);
-                    System.out.printf("  %-25s  |  %-25s  ", "Current Events", "Past Events");
+                    System.out.printf("  %-25s  |  %-25s  %n", "Current Events", "Past Events");
                     System.out.println("-----------------------------------------------------------");
                     for (int i = 0; i < curEvents.size() || i < pastEvents.size(); i++) {
                         String ce = "";
@@ -113,7 +114,7 @@ public class Client {
                         if (i < pastEvents.size())
                             pe = pastEvents.get(i).getTitle();
 
-                        System.out.printf("  %-25s  |  %-25s  ", ce, pe);
+                        System.out.printf("  %-25s  |  %-25s  %n", ce, pe);
                     }
                     System.out.println();
                 }
@@ -189,17 +190,34 @@ public class Client {
     /*
      * Creates a new Event object to be sent
      */
-    private static CreateEventRequest formEvent(Scanner scan) {
+    private static CreateEventRequest formEvent() {
+        Scanner scan = new Scanner(System.in);
+        String title = null;
+        String description =null;
+        double target = -1;
+        String deadline = null;
         try {
-            System.out.print("Enter the title for Event: ");
-            String title = scan.nextLine();
-            System.out.print("Enter the description for the Event: ");
-            String description = scan.nextLine();
-            System.out.print("Enter the target amount as a double (####.##): ");
-            double target = scan.nextDouble();
-            System.out.print(
-                    "Enter the deadline in the form YYYY-MM-DDTHH:MM:SSSZ\ne.g. Oct 25, 2023 at 1:45:30PM would be 2023-10-25T13:45:300Z: ");
-            String deadline = scan.nextLine();
+            while(title == null) {
+                System.out.print("Enter the title for Event: ");
+                title = scan.nextLine();
+            }
+            while(description == null) {
+                System.out.print("Enter the description for the Event: ");
+
+                description = scan.nextLine();
+            }
+            while(target < 0) {
+                System.out.print("Enter the target amount as a double (####.##): ");
+                String temp = scan.nextLine();
+                Scanner tempScan = new Scanner(temp);
+                if (tempScan.hasNextDouble())
+                    target = tempScan.nextDouble();
+            }
+            while (deadline == null) {
+                System.out.println(
+                        "Enter the deadline in the form YYYY-MM-DDTHH:MM.SSSZ\ne.g. Oct 25, 2023 at 1:45:30PM would be 2023-10-25T13:45.300Z: ");
+                deadline = scan.nextLine();
+            }
 
             return (new CreateEventRequest(title, description, target, deadline));
         } catch (Exception e) {
@@ -212,10 +230,9 @@ public class Client {
     /*
      * tries to connect to the server
      */
-    private static Socket connectToServer(Scanner scan) {
+    private static Socket connectToServer() {
         try {
-            Socket server = new Socket(getHost(scan), getPort(scan), null, 0);
-            return server;
+            return new Socket(getHost(), getPort(), null, 0);
         } catch (Exception e) {
             System.err.println(e);
         }
@@ -225,7 +242,8 @@ public class Client {
     /*
      * helper method of connectToServer to prompt the client for a server host
      */
-    private static String getHost(Scanner scan) {
+    private static String getHost() {
+        Scanner scan = new Scanner(System.in);
         System.out.print("Enter IP address: ");
         try {
             String host = scan.nextLine();
@@ -239,7 +257,8 @@ public class Client {
     /*
      * helper method of connectToServer to prompt the client for a port number
      */
-    private static int getPort(Scanner scan) {
+    private static int getPort() {
+        Scanner scan = new Scanner(System.in);
         System.out.print("Enter port number: ");
         try {
             int port = scan.nextInt();
@@ -257,7 +276,7 @@ public class Client {
         ArrayList<Event> events = new ArrayList<Event>();
         WriteJsonObject json = new WriteJsonObject();
         try {
-            out.writeBytes(json.serialize(new EventsRequest()));
+            out.writeBytes(json.serialize(new Request(RequestType.EVENTS, json.serialize(new EventsRequest()))) + "\n");
 
         } catch (Exception e) {
             System.err.println(e);
@@ -277,21 +296,17 @@ public class Client {
     /*
      * lists all the current events and prompts user to choose one
      */
-    private static void updateEvent(ArrayList<Event> EVENTS, Scanner scan, BufferedReader in, DataOutputStream out,
+    private static void updateEvent(ArrayList<Event> EVENTS, BufferedReader in, DataOutputStream out,
             WriteJsonObject json) {
+        Scanner scan = new Scanner(System.in);
         try {
-            System.out.print("choose an event or -1 to go back: ");
-            int index = scan.nextInt();
-            if (index < EVENTS.size() && index >= 0) {
+            System.out.println("choose an event or -1 to go back: ");
+            int index = scan.nextInt() - 1;
+            if (index < EVENTS.size()  && index >= 0) {
                 Event newEvent = EVENTS.get(index);
-                UpdateEventRequest update = changeEvent(newEvent, scan, json);
-                out.writeBytes(json.serialize(new Request(RequestType.UPDATE, json.serialize(update))));
-                Response response = json.deserialize(in.readLine(), Response.class);
-                if (response.responseType == RequestType.UPDATE) {
-                    if (index != json.deserialize(response.responseBody, Event.class).getId())
-                        throw new Exception(response.responseBody);
-                }
-            } else if (index == -1) {
+                String update = changeEvent(newEvent, json);
+                out.writeBytes(json.serialize(new Request(RequestType.UPDATE, update)) + "\n");
+            } else if (index == -2) {
 
             } else {
                 System.out.println("That index is not available.");
@@ -304,8 +319,9 @@ public class Client {
     /*
      * Prompts the user to pick an event and donates money to it
      */
-    private static void donateToEvent(ArrayList<Event> EVENTS, Scanner scan, BufferedReader in, DataOutputStream out,
+    private static void donateToEvent(ArrayList<Event> EVENTS, BufferedReader in, DataOutputStream out,
             WriteJsonObject json) {
+        Scanner scan = new Scanner(System.in);
         try {
             ArrayList<Event> curEvents = currentEvents(EVENTS);
             listEvents(curEvents);
@@ -317,7 +333,7 @@ public class Client {
                 String donate = json.serialize(new DonateRequest(curEvents.get(index).getId(), amount));
                 out.writeBytes(json.serialize(new Request(RequestType.DONATE, donate)));
             } else if (index == -1) {
-
+                return;
             } else {
                 System.out.println("That index is not available.");
             }
@@ -326,9 +342,6 @@ public class Client {
         }
         try {
             Response response = json.deserialize(in.readLine(), Response.class);
-            if (response.responseType != RequestType.DONATE) {
-                throw new Exception(response.responseBody);
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -338,37 +351,62 @@ public class Client {
     /*
      * Prints current variables and prompts for new variable
      */
-    private static UpdateEventRequest changeEvent(Event event, Scanner scan, WriteJsonObject json) {
-        System.out.printf("Current Title: %25s", event.getTitle());
-        System.out.print("New Title: ");
-        String title = scan.nextLine();
-        if (!title.equals(""))
+    private static String changeEvent(Event event, WriteJsonObject json) {
+        Scanner scan = new Scanner(System.in);
+        String title = null;
+        while (title == null){
+            System.out.printf("Current Title: %25s%n", event.getTitle());
+            System.out.print("New Title: ");
+            title = scan.nextLine();
+        }
+        if (!title.isEmpty())
             event.setTitle(title);
 
-        System.out.printf("Current Description: %s", event.getDescription());
-        System.out.print("New Description: ");
-        String description = scan.nextLine();
-        if (!description.equals(""))
+        String description = null;
+        while(description == null) {
+            System.out.printf("Current Description: %s%n", event.getDescription());
+            System.out.print("New Description: ");
+            description = scan.nextLine();
+        }
+        if (!description.isEmpty())
             event.setDescription(description);
 
-        System.out.printf("Current Target: %15f", event.getTarget());
-        System.out.print("New Target: ");
-        double target = scan.nextDouble();
+        double target = -1.0;
+        String temp;
+
+        while(target < 0) {
+            System.out.printf("Current Target: %-15f%n", event.getTarget());
+            System.out.print("New Target: ");
+            temp = scan.nextLine();
+            Scanner scantemp = new Scanner(temp);
+            if(scantemp.hasNextDouble())
+                target = scantemp.nextDouble();
+        }
         if (target != 0)
             event.setGoal(target);
 
-        System.out.printf("Current Balance: %15f", event.getBalance());
-        System.out.print("New Balance: ");
-        double balance = scan.nextDouble();
+        double balance = -1.0;
+
+        while(balance < 0) {
+            System.out.printf("Current Balance: %-15f%n", event.getBalance());
+            System.out.print("New Balance: ");
+            temp = scan.nextLine();
+            Scanner scantemp = new Scanner(temp);
+            if(scantemp.hasNextDouble())
+                balance = scantemp.nextDouble();
+        }
         if (balance != 0)
             event.setCurrentPool(balance);
 
-        System.out.printf("Current Date: %20s", event.getDeadlineString());
-        System.out.print("New Date (YYYY-MM-DDTHH:MM:SSSZ): ");
-        String date = scan.nextLine();
-        if (!date.equals(""))
+        String date = null;
+        while(date == null) {
+            System.out.printf("Current Date: %-20s%n", event.getDeadlineString());
+            System.out.print("New Date (YYYY-MM-DDTHH:MM.SSSZ): ");
+            date = scan.nextLine();
+        }
+        if (!date.isEmpty())
             event.setEndDate(date);
-        return new UpdateEventRequest(json.serialize(json));
+        return json.serialize(event);
     }
 
     /*
@@ -377,38 +415,7 @@ public class Client {
     private static void listEvents(ArrayList<Event> events) {
         int i = 1;
         for (Event event : events) {
-            System.out.printf("%8d.    %-35s%n        %s", i++, event.getTitle(), event.getDescription());
-        }
-    }
-
-    /*
-     * replaces the event with an updated version of the event
-     */
-    public static void replaceEvent(ArrayList<Event> events, Event event) {
-        int index = findIndex(events, event);
-        events.set(index, event);
-    }
-
-    /*
-     * finds the index the old version of the event is stored
-     */
-    public static int findIndex(ArrayList<Event> events, Event event) {
-        for (int i = 0; i < events.size(); i++) {
-            if (events.get(i).getId() == event.getId())
-                return i;
-        }
-        return 0;
-    }
-
-    /*
-     * returns a response if one exists from the reader
-     */
-    private static Response getResponse(BufferedReader in, WriteJsonObject json) {
-        try {
-            return json.deserialize(in.readLine(), Response.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            System.out.printf("%8d.    %-35s%n               = %-1s =%n", i++, event.getTitle(), event.getDescription());
         }
     }
 }
