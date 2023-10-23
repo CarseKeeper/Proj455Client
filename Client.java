@@ -40,7 +40,6 @@ public class Client {
 
             while (true) {
                 EVENTS = getEvents(in, out);
-                System.out.println(EVENTS);
                 System.out.printf("%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s\n>",
                         "(1):", "List the current events", "(2):", "Create a new event", "(3):", "Donate to an event",
                         "(4):", "Update an event", "(5):", "List ALL events", "(q):", "Quit");
@@ -231,15 +230,15 @@ public class Client {
 
         } catch (Exception e) {
             System.err.println(e.getMessage());
-        } finally {
-            try {
-                Response response = json.deserialize(in.readLine(), Response.class);
-                if (response.responseType == RequestType.EVENTS)
-                    events = json.deserialize(response.responseBody, new TypeReference<ArrayList<Event>>() {});
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
         }
+        try {
+            Response response = json.deserialize(in.readLine(), Response.class);
+            if (response.responseType == RequestType.EVENTS)
+                events = json.deserialize(response.responseBody, new TypeReference<ArrayList<Event>>() {});
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
 
         return events;
     }
