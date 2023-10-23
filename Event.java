@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-@JsonPropertyOrder({ "id", "title", "description", "target", "deadline", "balance" })
+@JsonPropertyOrder({ "id", "title", "description", "target", "deadline"})
 public class Event {
     private final int id;
     private String title;

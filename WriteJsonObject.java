@@ -3,6 +3,8 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 
+import java.util.ArrayList;
+
 public class WriteJsonObject {
     private final ObjectMapper objMap = new ObjectMapper();
 

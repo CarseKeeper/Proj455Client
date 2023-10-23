@@ -5,7 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.ser.Serializers;
@@ -27,56 +31,17 @@ public class Client {
                     server = connectToServer();
                     out = new DataOutputStream(server.getOutputStream());
                     in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-
-                    // ---------------------------------------------------------Attempt of Create
-                    // request
-                    // Request req = new Request(RequestType.CREATE,
-                    // json.serialize(
-                    // new CreateEventRequest("tilt", "extra tilt", 8458,
-                    // "2024-05-04T09:10:10.000Z")));
-
-                    // ---------------------------------------------------------Attempt of Events
-                    // request and response
-                    // Request req = new Request(RequestType.EVENTS, json.serialize(new
-                    // EventsRequest()));
-                    // out.writeBytes(json.serialize(req) + "\n");
-                    // String st = in.readLine();
-                    // System.out.println(st);
-                    // EVENTS = json.deserialize(json.deserialize(st, Response.class).responseBody,
-                    // EVENTS.getClass());
-                    // System.out.println(EVENTS);
-
-                    // ---------------------------------------------------------Attempt of Update
-                    // request and response
-                    // Request req = new Request(RequestType.UPDATE,
-                    // json.serialize(new Event(1, "TILT", "MORE TILT", 4, 0,
-                    // "2023-10-18T03:38:23.331Z")));
-                    // out.writeBytes(json.serialize(req) + "\n");
-                    // String st = in.readLine();
-                    // System.out.println(st);
-                    // Event ev = json.deserialize(json.deserialize(st,
-                    // Response.class).responseBody, Event.class);
-                    // System.out.println(ev.getTitle());
-
-                    // ---------------------------------------------------------Attempt of parsing
-                    // response as a request object...FAILED
-                    // System.out.println((json.deserialize(st, Event.class)).getTitle());
-                    // Request request = json.deserialize(in.readLine(), Request.class);
-                    // CreateEventRequest cr = json.deserialize(request.requestBody,
-                    // CreateEventRequest.class);
-                    // System.out.println(cr.title);
-
                     break;
 
                 } catch (Exception e) {
-                    System.err.println(e);
+                    System.err.println(e.getMessage());
                 }
             }
 
             while (true) {
                 EVENTS = getEvents(in, out);
                 System.out.println(EVENTS);
-                System.out.printf("%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s",
+                System.out.printf("%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s\n>",
                         "(1):", "List the current events", "(2):", "Create a new event", "(3):", "Donate to an event",
                         "(4):", "Update an event", "(5):", "List ALL events", "(q):", "Quit");
                 String answer = scan.nextLine();
@@ -143,28 +108,20 @@ public class Client {
      * Gets the active events from all events
      */
     private static ArrayList<Event> currentEvents(ArrayList<Event> EVENTS) {
-        ArrayList<Event> curEvents = new ArrayList<Event>();
-        for (Event event : EVENTS) {
-            if (event.hasEnded())
-                continue;
-            else
-                curEvents.add(event);
-        }
-
-        return curEvents;
+        return EVENTS
+                .stream()
+                .filter(event -> !event.hasEnded())
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /*
      * Gets the past events from all events
      */
     private static ArrayList<Event> pastEvents(ArrayList<Event> EVENTS) {
-        ArrayList<Event> pastEvents = new ArrayList<Event>();
-        for (Event event : EVENTS) {
-            if (event.hasEnded())
-                pastEvents.add(event);
-        }
-
-        return pastEvents;
+        return EVENTS
+                .stream()
+                .filter(Event::hasEnded)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /*
@@ -175,16 +132,9 @@ public class Client {
             WriteJsonObject json) {
         try {
             String body = json.serialize(newEvent);
-            out.writeBytes(json.serialize(new Request(RequestType.CREATE, body)));
+            out.writeBytes(json.serialize(new Request(RequestType.CREATE, body)) + "\n");
         } catch (Exception e) {
             System.err.println(e);
-        } finally {
-            Response response = getResponse(in, json);
-            if (response.responseType == RequestType.CREATE) {
-                EVENTS.add(json.deserialize(response.responseBody, Event.class));
-            } else {
-                System.err.println("error occured, response body: " + response.responseBody);
-            }
         }
     }
 
@@ -222,7 +172,7 @@ public class Client {
 
             return (new CreateEventRequest(title, description, target, deadline));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
             return null;
         }
 
@@ -235,7 +185,7 @@ public class Client {
         try {
             return new Socket(getHost(), getPort(), null, 0);
         } catch (Exception e) {
-            System.err.println(e);
+            System.err.println(e.getMessage());
         }
         return null;
     }
@@ -280,14 +230,14 @@ public class Client {
             out.writeBytes(json.serialize(new Request(RequestType.EVENTS, json.serialize(new EventsRequest()))) + "\n");
 
         } catch (Exception e) {
-            System.err.println(e);
+            System.err.println(e.getMessage());
         } finally {
             try {
                 Response response = json.deserialize(in.readLine(), Response.class);
                 if (response.responseType == RequestType.EVENTS)
-                    events = json.deserialize(response.responseBody, events.getClass());
+                    events = json.deserialize(response.responseBody, new TypeReference<ArrayList<Event>>() {});
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println(e.getMessage());
             }
         }
 
@@ -313,7 +263,7 @@ public class Client {
                 System.out.println("That index is not available.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
@@ -326,25 +276,41 @@ public class Client {
         try {
             ArrayList<Event> curEvents = currentEvents(EVENTS);
             listEvents(curEvents);
-            System.out.print("Choose and active event or -1 to go back: ");
-            int index = scan.nextInt();
-            if (index > 0 && index < curEvents.size()) {
-                System.out.print("Enter a donation amount (####.##): ");
-                double amount = scan.nextDouble();
+            int index = -2;
+            String temp;
+            while (index < -1){
+                System.out.print("Choose and active event or 0 to go back: ");
+                temp = scan.nextLine();
+                Scanner scanTemp = new Scanner(temp);
+                if (scanTemp.hasNextInt())
+                    index = scanTemp.nextInt() - 1;
+
+            }
+
+            if (index >= 0 && index < curEvents.size()) {
+                double amount = -1.0;
+
+                while (amount < 0) {
+                    System.out.print("Enter a donation amount (####.##): ");
+                    temp = scan.nextLine();
+                    Scanner scanTemp = new Scanner(temp);
+                    if (scanTemp.hasNextDouble())
+                        amount = scanTemp.nextDouble();
+                }
                 String donate = json.serialize(new DonateRequest(curEvents.get(index).getId(), amount));
-                out.writeBytes(json.serialize(new Request(RequestType.DONATE, donate)));
+                out.writeBytes(json.serialize(new Request(RequestType.DONATE, donate)) + "\n");
             } else if (index == -1) {
                 return;
             } else {
                 System.out.println("That index is not available.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
         try {
             Response response = json.deserialize(in.readLine(), Response.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
 
     }
