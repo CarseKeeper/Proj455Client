@@ -54,7 +54,7 @@ public class Client {
                 // CREATE A NEW EVENT
                 else if (answer.startsWith("2")) {
                     CreateEventRequest newEvent = formEvent();
-                    createEvent(EVENTS, newEvent, out, in, json);
+                    createEvent(newEvent, out, in, json);
                 }
                 // DONATE AN AMOUNT TO AN EVENT
                 else if (answer.startsWith("3")) {
@@ -126,7 +126,7 @@ public class Client {
     /*
      * Sends information to create a new event
      */
-    private static void createEvent(ArrayList<Event> EVENTS, CreateEventRequest newEvent, DataOutputStream out,
+    private static void createEvent(CreateEventRequest newEvent, DataOutputStream out,
             BufferedReader in,
             WriteJsonObject json) {
         try {
