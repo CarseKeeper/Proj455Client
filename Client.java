@@ -75,6 +75,7 @@ public class Client {
 
             while (true) {
                 EVENTS = getEvents(in, out);
+                System.out.println(EVENTS);
                 System.out.printf("%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s%n%-4s    %30s",
                         "(1):", "List the current events", "(2):", "Create a new event", "(3):", "Donate to an event",
                         "(4):", "Update an event", "(5):", "List ALL events", "(q):", "Quit");
