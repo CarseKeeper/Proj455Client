@@ -351,7 +351,7 @@ public class Client {
         double balance = -1.0;
 
         while(balance < 0) {
-            System.out.printf("Current Balance: $%-15s%n", getCurrency(event.getBalance()));
+            System.out.printf("Current Balance: %-15s%n", getCurrency(event.getBalance()));
             System.out.print("New Balance: ");
             temp = scan.nextLine();
             Scanner scantemp = new Scanner(temp);
@@ -405,13 +405,13 @@ public class Client {
             String ped = "";
             if (i < curEvents.size()) {
                 ce = curEvents.get(i).getTitle();
-                cet = String.valueOf(curEvents.get(i).getTarget());
+                cet = getCurrency(curEvents.get(i).getTarget());
                 cep = getPercent(curEvents.get(i).getTarget(), curEvents.get(i).getBalance());
                 ced = curEvents.get(i).getDeadlineString().substring(0, 10);
             }
             if (i < pastEvents.size()) {
                 pe = pastEvents.get(i).getTitle();
-                pet = String.valueOf(pastEvents.get(i).getTarget());
+                pet = getCurrency(pastEvents.get(i).getTarget());
                 pep = getPercent(pastEvents.get(i).getTarget(), pastEvents.get(i).getBalance());
                 ped = pastEvents.get(i).getDeadlineString().substring(0, 10);
             }
@@ -436,7 +436,7 @@ public class Client {
      * gets the currency formatted String of a value
      */
     private static String getCurrency(double value){
-        NumberFormat currency = NumberFormat.getCurrencyInstance();
+        DecimalFormat currency = new DecimalFormat("$###,##0.00");
         return currency.format(value);
     }
 }

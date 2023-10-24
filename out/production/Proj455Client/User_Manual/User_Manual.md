@@ -102,7 +102,7 @@ Selecting an Event to Update</div>
 
     b. The current and past events will be listed out
 
-<div align="center"><p><img src="Pictures/ListAll.jpg" alt="Picture of ALL Events being listed out with some relevant information in a table" width="350" style="border: white solid 1px"></p>
+<div align="center"><p><img src="Pictures/tux_huge.png" alt="Picture of ALL Events being listed out with some relevant information in a table" width="350" style="border: white solid 1px"></p>
 Listing of All Events in a Table format</div>
 
 6.  Quit Client-side
