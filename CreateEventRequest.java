@@ -34,15 +34,12 @@ public class CreateEventRequest {
         else
             this.target = Math.abs(target);
 
-        // System.out.println(deadline);
         try {
             SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-            // System.out.println(date.parse(deadline));
-            // if (date.parse(deadline).after(new Date()))
-            // this.deadline = date.parse(deadline);
-            // else
-            // this.deadline = new Date();
-            this.deadline = date.parse(date.format(new Date()));
+            if (date.parse(deadline).after(new Date()))
+                this.deadline = date.parse(deadline);
+            else
+                this.deadline = new Date();
         } catch (Exception e) {
             e.printStackTrace();
         }

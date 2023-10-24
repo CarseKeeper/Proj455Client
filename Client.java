@@ -158,7 +158,7 @@ public class Client {
             }
             while (deadline == null) {
                 System.out.println(
-                        "Enter the deadline in the form YYYY-MM-DDTHH:MM.SSSZ\ne.g. Oct 25, 2023 at 1:45:30PM would be 2023-10-25T13:45.300Z: ");
+                        "Enter the deadline in the form YYYY-MM-DDTHH:MM:ss.SSSZ\ne.g. Oct 25, 2023 at 1:45:30.30PM would be 2023-10-25T13:45:30.300Z: ");
                 deadline = scan.nextLine();
             }
 
@@ -367,7 +367,7 @@ public class Client {
         String date = null;
         while(date == null) {
             System.out.printf("Current Date: %-20s%n", event.getDeadlineString());
-            System.out.print("New Date (YYYY-MM-DDTHH:MM.SSSZ): ");
+            System.out.print("New Date (YYYY-MM-DDTHH:MM:ss.SSSZ): ");
             date = scan.nextLine();
         }
         if (!date.isEmpty())
