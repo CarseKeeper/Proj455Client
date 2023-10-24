@@ -427,7 +427,7 @@ public class Client {
      * gets the percent completeness of an event and returns it as a String with 2 decimal places
      */
     private static String getPercent(double target, double balance){
-        double percent = (balance/target) * 100;
+        double percent = (balance/target);
         NumberFormat percentage = NumberFormat.getPercentInstance();
         return percentage.format(percent);
     }

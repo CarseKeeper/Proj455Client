@@ -28,7 +28,7 @@ The SQLlite Database</div>
 
 ### How to run the Client side:
 
-1. Run Client.java using preferred method, Easiest is to press the run button in the top right
+1. Run Client.jar using preferred method, cd into 
 
 2. Enter the server computer's IP address when prompted
 
