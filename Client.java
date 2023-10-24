@@ -44,7 +44,7 @@ public class Client {
             while (true) {
                 EVENTS = getEvents(in, out); //Each iteration updates the list of all events
                 //User is prompted for an action
-                System.out.printf("%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s\n>",
+                System.out.printf("%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s\n> ",
                         "(1):", "List the current events", "(2):", "Create a new event", "(3):", "Donate to an event",
                         "(4):", "Update an event", "(5):", "List ALL events", "(q):", "Quit");
                 String answer = scan.nextLine();
@@ -381,7 +381,7 @@ public class Client {
     private static void listEvents(ArrayList<Event> events) {
         int i = 1;
         for (Event event : events) {
-            System.out.printf("%8d.    %-35s  Ends: %-12s%n               = %-1s =%n", i++, event.getTitle(), event.getDeadlineString().substring(0,10), event.getDescription());
+            System.out.printf("%8d.    %-35s  Ends: %-12s%n               = %-1s =%n----------------------------------------------------%n", i++, event.getTitle(), event.getDeadlineString().substring(0,10), event.getDescription());
         }
     }
 

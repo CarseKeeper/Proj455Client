@@ -49,6 +49,8 @@ Client Prompts</div>
 
     b. The current/active events will be listed out
 
+<div align="center"><p><img src="Pictures/tux_huge.png" alt="Picture of the List current events action result" width="350"></p>
+List of current Events</div>
 
 2. Create a new Event
 
@@ -58,7 +60,7 @@ Client Prompts</div>
 
    c. Enter the Description for your event
 
-   d. Enter the Target amount for your event in the form #00.00
+   d. Enter the Target amount for your event in the form ####.00
 
    e. Enter the Deadline of your event in the form YYYY-MM-DDTHH:MM:SSSZ
 
@@ -71,7 +73,10 @@ Client Prompts</div>
 
     b. Enter the number of the event you wish to donate to
 
-    c. Enter the amount you wish to donate in the form #00.00
+    c. Enter the amount you wish to donate in the form ####.00
+
+<div align="center"><p><img src="Pictures/tux_huge.png" alt="Picture of the list of current events with the selected event highlighted" width="350"></p>
+Selecting an Event to Donate to</div>
 
 
 4.  Update an event
@@ -88,6 +93,8 @@ Client Prompts</div>
 
     f. Enter the new balance of the event or leave blank to keep the current
 
+<div align="center"><p><img src="Pictures/tux_huge.png" alt="Picture of all events being listed with the selected event highlighted" width="350"></p>
+Selecting an Event to Update</div>
 
 5.  List all events
 
@@ -95,9 +102,12 @@ Client Prompts</div>
 
     b. The current and past events will be listed out
 
+<div align="center"><p><img src="Pictures/tux_huge.png" alt="Picture of ALL Events being listed out with some relevant information in a table" width="350"></p>
+Listing of All Events in a Table format</div>
 
 6.  Quit Client-side
 
     a. Enter q at the Options prompt
 
     b. The program will end
+<div align="center"><p><img src="Pictures/tux_huge.png" alt="Picture of a server icon" width="150" style="margin-right: 15%; opacity: 30%"><img src="Pictures/tux_huge.png" alt="" width="150" style="opacity: 30%"></p></div>
