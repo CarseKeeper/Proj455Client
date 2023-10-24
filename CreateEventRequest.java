@@ -18,6 +18,9 @@ public class CreateEventRequest {
     public Date deadline;
     public double balance;
 
+    /**
+     * Constructor that tells the Jackson parser how to serialize and deserialize the object and json
+     */
     @JsonCreator
     public CreateEventRequest(@JsonProperty("title") String title,
             @JsonProperty("description") String description,
@@ -47,6 +50,9 @@ public class CreateEventRequest {
 
     }
 
+    /**
+     * gets the formatted String representation of the date to be displayed
+     */
     @JsonGetter("deadline")
     public String getDeadlineString() {
         try {

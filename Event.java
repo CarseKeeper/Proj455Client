@@ -24,6 +24,10 @@ public class Event {
     private Date deadline;
     private double balance;
 
+    /**
+     * Constructor that tells the Jackson parser how to serialize and deserialize the object and json,
+     * has validation so if wierd data gets into the constructor, it gets normalized.
+     */
     @JsonCreator
     public Event(@JsonProperty("id") int id,
             @JsonProperty("title") String title,
@@ -80,10 +84,11 @@ public class Event {
         return df.format(this.deadline);
     }
 
-
     public Date getDeadline() {
         return this.deadline;
     }
+
+
 
     // Setters
     public void setTitle(String event) {
@@ -137,7 +142,5 @@ public class Event {
     public boolean hasEnded() {
         return !(new Date()).before(this.deadline);
     }
-
-    // pass Id not index
 
 }

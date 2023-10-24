@@ -30,9 +30,9 @@ public class Client {
             // While loop for getting a connection to the server
             while (true) {
                 try {
-                    server = connectToServer();
-                    out = new DataOutputStream(server.getOutputStream());
-                    in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+                    server = connectToServer(); //Method prompts for host ip and port
+                    out = new DataOutputStream(server.getOutputStream()); //dataouputstream created from socket
+                    in = new BufferedReader(new InputStreamReader(server.getInputStream())); //bufferedreader created from socket
                     break;
 
                 } catch (Exception e) {
@@ -95,7 +95,7 @@ public class Client {
     // -------------------------------------------------------------------------------------------------------------------------------------//
     // -------------------------------------------------------------------------------------------------------------------------------------//
 
-    /*
+    /**
      * Gets the active events from all events
      */
     private static ArrayList<Event> currentEvents(ArrayList<Event> EVENTS) {
@@ -105,7 +105,7 @@ public class Client {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    /*
+    /**
      * Gets the past events from all events
      */
     private static ArrayList<Event> pastEvents(ArrayList<Event> EVENTS) {
@@ -115,7 +115,7 @@ public class Client {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    /*
+    /**
      * Sends information to create a new event
      */
     private static void createEvent(CreateEventRequest newEvent, DataOutputStream out,
@@ -130,7 +130,7 @@ public class Client {
         }
     }
 
-    /*
+    /**
      * Creates a new Event object to be sent
      */
     private static CreateEventRequest formEvent() {
@@ -170,7 +170,7 @@ public class Client {
 
     }
 
-    /*
+    /**
      * tries to connect to the server
      */
     private static Socket connectToServer() {
@@ -182,7 +182,7 @@ public class Client {
         return null;
     }
 
-    /*
+    /**
      * helper method of connectToServer to prompt the client for a server host
      */
     private static String getHost() {
@@ -197,7 +197,7 @@ public class Client {
         return null;
     }
 
-    /*
+    /**
      * helper method of connectToServer to prompt the client for a port number
      */
     private static int getPort() {
@@ -212,7 +212,7 @@ public class Client {
         return 6789;
     }
 
-    /*
+    /**
      * gets all events from server and returns them as an ArrayList
      */
     private static ArrayList<Event> getEvents(BufferedReader in, DataOutputStream out) {
@@ -236,7 +236,7 @@ public class Client {
         return events;
     }
 
-    /*
+    /**
      * lists all the current events and prompts user to choose one
      */
     private static void updateEvent(ArrayList<Event> EVENTS, BufferedReader in, DataOutputStream out,
@@ -260,7 +260,7 @@ public class Client {
         }
     }
 
-    /*
+    /**
      * Prompts the user to pick an event and donates money to it
      */
     private static void donateToEvent(ArrayList<Event> EVENTS, BufferedReader in, DataOutputStream out,
@@ -308,7 +308,7 @@ public class Client {
 
     }
 
-    /*
+    /**
      * Prints current variables and prompts for new variable
      */
     private static String changeEvent(Event event, WriteJsonObject json) {
@@ -375,7 +375,7 @@ public class Client {
         return json.serialize(event);
     }
 
-    /*
+    /**
      * helper method of chooseEvent that lists all events
      */
     private static void listEvents(ArrayList<Event> events) {
@@ -385,7 +385,7 @@ public class Client {
         }
     }
 
-    /*
+    /**
      * Prints all events, past and current, in a table
      */
     private static void listAllEvents(ArrayList<Event> EVENTS){
@@ -423,7 +423,7 @@ public class Client {
         System.out.println();
     }
 
-    /*
+    /**
      * gets the percent completeness of an event and returns it as a String with 2 decimal places
      */
     private static String getPercent(double target, double balance){
@@ -432,7 +432,7 @@ public class Client {
         return percentage.format(percent);
     }
 
-    /*
+    /**
      * gets the currency formatted String of a value
      */
     private static String getCurrency(double value){

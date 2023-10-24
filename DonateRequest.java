@@ -5,6 +5,9 @@ public class DonateRequest {
     public double amount;
     public int eventid;
 
+    /**
+     * Constructor that tells the Jackson parser how to serialize and deserialize the object and json
+     */
     @JsonCreator
     public DonateRequest(@JsonProperty("id") int eventid,
             @JsonProperty("amount") double amount) {

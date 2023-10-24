@@ -1,5 +1,5 @@
 # <ins>User Manual</ins>
-## Server-side Program
+## *Server-side Program*
 
 ### Press Play
 
@@ -11,15 +11,20 @@ IP that will show in your terminal.
 Standard logs will be in white and errors will appear in red.
 Errors will be logged in the server and sent to the client.
 
-
 ### Request Response Model
 
 The Server Client pair uses an in-house communication method
 that passes serialized request and response objects to each other.
 This helps protect data and makes error handling easy.
 
+### Database
 
-## Client-side Program
+The database used for the server of this project is SQLlite which when opened up looks like this:
+
+<div align="center"><p><img src=Pictures/tux_huge.png alt="SQLlite Database" width=200px></p>
+The SQLlite Database</div>
+
+## *Client-side Program*
 
 ### How to run the Client side:
 
@@ -32,6 +37,9 @@ This helps protect data and makes error handling easy.
 4. Enter the Option you want to use from the Option list (more information in the Options section)
 
 5. Follow the Prompts as listed
+
+<div align="center"><p><img src="Pictures/tux_huge.png" alt="Picture of the Prompts on the Client-side" width="350"></p>
+Client Prompts</div>
 
 ### Options
 
