@@ -42,7 +42,6 @@ public class Client {
 
             //MAIN Logic Loop
             while (true) {
-                EVENTS = getEvents(in, out); //Each iteration updates the list of all events
                 //User is prompted for an action
                 System.out.printf("%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s%n%-4s    %-30s\n> ",
                         "(1):", "List the current events", "(2):", "Create a new event", "(3):", "Donate to an event",
@@ -51,6 +50,7 @@ public class Client {
 
                 // LIST CURRENT EVENTS
                 if (answer.startsWith("1")) {
+                    EVENTS = getEvents(in, out);
                     EVENTS = currentEvents(EVENTS);
                     listEvents(EVENTS);
                     System.out.println();
@@ -62,15 +62,18 @@ public class Client {
                 }
                 // DONATE AN AMOUNT TO AN EVENT
                 else if (answer.startsWith("3")) {
+                    EVENTS = getEvents(in, out);
                     donateToEvent(EVENTS, in, out, json);
                 }
                 // UPDATES AN EVENT FROM ALL EVENTS
                 else if (answer.startsWith("4")) {
+                    EVENTS = getEvents(in, out);
                     listEvents(EVENTS);
                     updateEvent(EVENTS, in, out, json);
                 }
                 // PRINTS OUT CURRENT EVENTS AND PAST EVENTS
                 else if (answer.startsWith("5")) {
+                    EVENTS = getEvents(in, out);
                     listAllEvents(EVENTS);
                     System.out.println();
                 }
